@@ -1,17 +1,19 @@
-import { PATH_DB } from '../constants/contacts.js';
 import fs from 'node:fs/promises';
-import { getAllContacts } from './getAllContacts.js';
-
+import { PATH_DB } from '../constants/contacts.js';
 export const removeLastContact = async () => {
   try {
-    const currentContacts = await getAllContacts();
-    currentContacts.pop();
-    const data = JSON.stringify(currentContacts, null, 2); // Convert the updated array back to a JSON string
+    const data = await fs.readFile(PATH_DB, 'utf8');
+    let contacts = JSON.parse(data);
 
-    await fs.writeFile(PATH_DB, data, 'utf8'); // Write the updated data back to the contacts file
-    console.log('The last contact was successfully deleted.');
+    if (contacts.length > 0) {
+      contacts.pop();
+      await fs.writeFile(PATH_DB, JSON.stringify(contacts, null, 2));
+      console.log('The contact was deleted');
+    } else {
+      console.log('Array is empty');
+    }
   } catch (error) {
-    console.log('Error removing last contact:', error);
+    console.log('Error: ', error);
   }
 };
 

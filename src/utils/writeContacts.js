@@ -1,16 +1,19 @@
 import { PATH_DB } from '../constants/contacts.js';
 import fs from 'node:fs/promises';
-import { getAllContacts } from '../scripts/getAllContacts.js';
 
 export const writeContacts = async (updatedContacts) => {
   try {
-    const currentContacts = await getAllContacts();
-    currentContacts.push(...updatedContacts);
-    const data = JSON.stringify(currentContacts, null, 2);
-
-    await fs.writeFile(PATH_DB, data, 'utf8');
-    console.log('Data successfully written to file!');
+    let contacts = [];
+    try {
+      const data = await fs.readFile(PATH_DB, 'utf-8');
+      contacts = JSON.parse(data);
+    } catch (error) {
+      contacts = [];
+      console.log('Помилка: ', error);
+    }
+    contacts = contacts.concat(updatedContacts);
+    await fs.writeFile(PATH_DB, JSON.stringify(contacts, null, 2));
   } catch (error) {
-    console.log('Error writing to file: ', error);
+    console.log('Помилка: ', error);
   }
 };
